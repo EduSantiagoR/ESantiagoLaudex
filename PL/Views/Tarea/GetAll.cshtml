@@ -1,0 +1,290 @@
+﻿@model ML.Tarea
+@{
+    ViewData["Title"] = "GetAll";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+<h1 class="text-center">Tareas</h1>
+<hr />
+<div>
+    <p>Agrega una nueva tarea.</p>
+    <button type="button" onclick="LimpiarModal()" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+        Nueva tarea
+    </button>
+</div>
+<hr />
+<body>
+    <div class="container">
+        @if (Model.Tareas != null)
+        {
+            if (Model.Tareas.Count > 0)
+            {
+                <div class="row">
+                    <div class="col">
+                        <div class="row row-cols-1 row-cols-md-3 g-4">
+                            @foreach (ML.Tarea tarea in Model.Tareas)
+                            {
+                                if (tarea.Estatus.IdEstatus == 1)
+                                {
+                                    <div class="col">
+                                        @if (tarea.Importante)
+                                        {
+                                            <div class="card text-dark bg-warning mb-3" style="max-width: 18rem;border:solid 2px red">
+                                                <div class="card-header">
+                                                    @tarea.Estatus.Estado
+                                                    <span><i class="fa-solid fa-triangle-exclamation fa-beat-fade" style="color: #ff0000;"></i></span>
+                                                </div>
+                                                <div class="card-body">
+                                                    <h5 class="card-title">@tarea.Titulo</h5>
+                                                    <p class="card-text">@tarea.Descripcion</p>
+                                                    <p class="card-text">Vence: @tarea.FechaVencimiento</p>
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" onchange="ChangeStatus('@tarea.IdTarea', this)" type="checkbox" id="flexSwitchCheckChecked">
+                                                        <label class="form-check-label" for="flexSwitchCheckChecked">Finalizada</label>
+                                                    </div>
+                                                </div>
+                                                <div class="card-footer">
+                                                    <div>
+                                                        <button type="button" onclick="CargarModal('@tarea.IdTarea')" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                                                            Editar
+                                                        </button>
+                                                        <a class="btn btn-danger" href="@Url.Action("Delete", "Tarea", new {idTarea=tarea.IdTarea})">Eliminar</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="card text-dark bg-warning mb-3" style="max-width: 18rem;">
+                                                <div class="card-header">
+                                                    @tarea.Estatus.Estado
+                                                </div>
+                                                <div class="card-body">
+                                                    <h5 class="card-title">@tarea.Titulo</h5>
+                                                    <p class="card-text">@tarea.Descripcion</p>
+                                                    <p class="card-text">Vence: @tarea.FechaVencimiento</p>
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" onchange="ChangeStatus('@tarea.IdTarea', this)" type="checkbox" id="flexSwitchCheckChecked">
+                                                        <label class="form-check-label" for="flexSwitchCheckChecked">Finalizada</label>
+                                                    </div>
+                                                </div>
+                                                <div class="card-footer">
+                                                    <div>
+                                                        <button type="button" onclick="CargarModal('@tarea.IdTarea')" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                                                            Editar
+                                                        </button>
+                                                        <a class="btn btn-danger" href="@Url.Action("Delete", "Tarea", new {idTarea=tarea.IdTarea})">Eliminar</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="col">
+                                        <div class="card text-white bg-success mb-3" style="max-width: 18rem;">
+                                            <div class="card-header">@tarea.Estatus.Estado</div>
+                                            <div class="card-body">
+                                                <h5 class="card-title">@tarea.Titulo</h5>
+                                                <p class="card-text">@tarea.Descripcion</p>
+                                                <p class="card-text">Vence: @tarea.FechaVencimiento</p>
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" onchange="ChangeStatus('@tarea.IdTarea', this)" type="checkbox" id="flexSwitchCheckChecked" checked>
+                                                    <label class="form-check-label" for="flexSwitchCheckChecked">Finalizada</label>
+                                                </div>
+                                            </div>
+                                            <div class="card-footer">
+                                                <div>
+                                                    <button type="button" onclick="CargarModal('@tarea.IdTarea')" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                                                        Editar
+                                                    </button>
+                                                    <a class="btn btn-danger" href="@Url.Action("Delete", "Tarea", new {idTarea=tarea.IdTarea})">Eliminar</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                    <div class="col" id="calendar">
+                        
+                    </div>
+                </div>
+                
+                
+            }
+            else
+            {
+                <div role="alert" class="alert alert-warning">No hay tareas registradas.</div>
+            }
+            <!-- Modal -->
+            <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="staticBackdropLabel">Tarea</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input id="txtIdTarea" hidden />
+                            <input id="txtIdEstatus" hidden/>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="inputGroup-sizing-default">Título</span>
+                                <input id="txtTitulo" type="text" placeholder="Título" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                            </div>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="inputGroup-sizing-default">Fecha de vencimiento</span>
+                                <input id="txtFechaVencimiento" placeholder="aaaa-mm-dd hh-mm-ss" type="datetime" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input"  type="checkbox" id="inputImportante">
+                                <label class="form-check-label" for="inputImportante">Importante</label>
+                            </div><br />
+                            <div class="input-group">
+                                <span class="input-group-text">Descripción</span>
+                                <textarea id="txtDescripcion" placeholder="Descripción" class="form-control" aria-label="With textarea"></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                            <button onclick="Save()" type="button" class="btn btn-success">Guardar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <script type="text/javascript">
+        var tareas = [];
+
+        function GetAll() {
+            return new Promise(function (resolve, reject) {
+                $.ajax({
+                    url: '/Tarea/GetTareas',
+                    type: 'GET',
+                    success: function (result) {
+                        $.each(result, function (index, tar) {
+                            var fechaSinTiempo = tar.fechaVencimiento.split('T')[0];
+                            var tarea = {
+                                color: '',
+                                title: tar.titulo,
+                                start: fechaSinTiempo,
+                                textColor: 'black',
+                                borderColor: 'green'
+                            };
+                            if (tar.estatus.estado == "Completa") {
+                                tarea.color = 'green';
+                            } else {
+                                tarea.color = 'yellow';
+                                if (tar.importante == true) {
+                                    tarea.borderColor = 'red';
+                                }
+                            }
+                            tareas.push(tarea);
+                        });
+                        resolve();
+                    },
+                    error: function (error) {
+                        reject('Error al recuperar las tareas con AJAX.');
+                    }
+                });
+            });
+        }
+        
+        //Calendario
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                events: []
+            });
+
+            GetAll().then(function () {
+                calendar.setOption('events', tareas);
+                calendar.render();
+            }).catch(function (error) {
+                alert(error);
+            });
+        });
+
+        function ChangeStatus(id, e) {
+            var estatus = e.checked;
+            var idEstado = '';
+            if (estatus == true) {
+                idEstado = '2';
+            }
+            else {
+                idEstado = '1';
+            }
+            $.ajax({
+                url: '/Tarea/ChangeStatus',
+                type: 'GET',
+                dataType: 'json',
+                data: { idTarea: id, idEstatus: idEstado },
+                success: function (result) {
+                    location.reload();
+                },
+                error: function (error) {
+                    alert('Error al cambiar es estatus.');
+                }
+            });
+        }
+
+        function CargarModal(id){
+            $.ajax({
+                url: '/Tarea/GetById',
+                type: 'GET',
+                dataType: 'json',
+                data: {idTarea: id},
+                success: function (result) {
+                    $('#txtIdTarea').val(result.idTarea);
+                    $('#txtIdEstatus').val(result.estatus.idEstatus);
+                    $('#txtTitulo').val(result.titulo);
+                    $('#inputImportante').prop('checked', result.importante);
+                    $('#txtFechaVencimiento').val(result.fechaVencimiento);
+                    $('#txtDescripcion').val(result.descripcion);
+                },
+                error: function (error) {
+                    alert('Error al recuperar información de la tarea.');
+                }
+            });
+        }
+        function Save(){
+            var tareaNueva = {
+                IdTarea: parseInt($('#txtIdTarea').val()),
+                Titulo: $('#txtTitulo').val(),
+                Descripcion: $('#txtDescripcion').val(),
+                Importante: $('#inputImportante').prop('checked'),
+                FechaVencimiento: $('#txtFechaVencimiento').val(),
+                Estatus: {
+                    IdEstatus: parseInt($('#txtIdEstatus').val()),
+                    Estado: ''
+                }
+            }
+            $.ajax({
+                url: '/Tarea/Post',
+                type: 'POST',
+                dataType: 'json',
+                data: { tarea: tareaNueva},
+                success: function (result) {
+                    location.reload();
+                },
+                error: function (error) {
+                    alert('Error.');
+                }
+            });
+        }
+        
+        function LimpiarModal() {
+            $('#txtIdTarea').val(0);
+            $('#txtIdEstatus').val(1);
+            $('#txtTitulo').val('');
+            $('#inputImportante').prop('checked', false);
+            $('#txtFechaVencimiento').val('');
+            $('#txtDescripcion').val('');
+        }
+    </script>
+</body>
